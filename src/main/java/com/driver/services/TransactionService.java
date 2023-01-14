@@ -1,5 +1,7 @@
 package com.driver.services;
 
+import com.driver.models.Book;
+import com.driver.models.Card;
 import com.driver.models.Transaction;
 import com.driver.models.TransactionStatus;
 import com.driver.repositories.BookRepository;
@@ -44,7 +46,28 @@ public class TransactionService {
         //If the transaction is successful, save the transaction to the list of transactions and return the id
 
         //Note that the error message should match exactly in all cases
-
+        if(!(bookRepository5.existsById(bookId) && bookRepository5.findById(bookId).get().isAvailable())){
+            throw new RuntimeException("Book is either unavailable or not present");
+        }
+        else if(!(cardRepository5.findById(cardId).get().getCardStatus().toString().equals("ACTIVATED"))){
+            throw new RuntimeException("Card is invalid");
+        }
+        else if(!(cardRepository5.findById(cardId).get().getBooks().size()>max_allowed_books)){
+            throw new RuntimeException("Book limit has reached for this card");
+        }
+        else{
+            Book book=bookRepository5.findById(bookId).get();
+            Card card=cardRepository5.findById(cardId).get();
+            Transaction transaction=new Transaction();
+            transaction.setBook(book);
+            transaction.setCard(card);
+            List<Book> cardBooks=card.getBooks();
+            cardBooks.add(book);
+            card.setBooks(cardBooks);
+            book.setAvailable(false);
+            bookRepository5.save(book);
+            transactionRepository5.save(transaction);
+        }
        return null; //return transactionId instead
     }
 
@@ -56,6 +79,8 @@ public class TransactionService {
         //for the given transaction calculate the fine amount considering the book has been returned exactly when this function is called
         //make the book available for other users
         //make a new transaction for return book which contains the fine amount as well
+
+        
 
         Transaction returnBookTransaction  = null;
         return returnBookTransaction; //return the transaction after updating all details
