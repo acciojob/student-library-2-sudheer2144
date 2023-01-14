@@ -38,6 +38,10 @@ public class Card {
         this.cardStatus = CardStatus.ACTIVATED;
     }
 
+    public Card(CardStatus cardStatus) {
+        this.cardStatus = cardStatus;
+    }
+
     public int getId() {
         return id;
     }
