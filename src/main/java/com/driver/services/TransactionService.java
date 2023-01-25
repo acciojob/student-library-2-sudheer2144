@@ -11,7 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class TransactionService {
@@ -46,29 +48,43 @@ public class TransactionService {
         //If the transaction is successful, save the transaction to the list of transactions and return the id
 
         //Note that the error message should match exactly in all cases
-        if(!(bookRepository5.existsById(bookId) && bookRepository5.findById(bookId).get().isAvailable())){
+        Book book=bookRepository5.findById(bookId).get();
+        Card card=cardRepository5.findById(cardId).get();
+
+        Transaction transaction=new Transaction();
+        transaction.setBook(book);
+        transaction.setCard(card);
+        transaction.setIssueOperation(true);
+
+        if(!(bookRepository5.existsById(book.getId()) && book.isAvailable())){
+            transaction.setTransactionStatus(TransactionStatus.FAILED);
+            transactionRepository5.save(transaction);
             throw new RuntimeException("Book is either unavailable or not present");
         }
-        else if(!(cardRepository5.findById(cardId).get().getCardStatus().toString().equals("ACTIVATED"))){
+
+        if(!(card.getCardStatus().toString().equals("ACTIVATED"))){
+            transaction.setTransactionStatus(TransactionStatus.FAILED);
+            transactionRepository5.save(transaction);
             throw new RuntimeException("Card is invalid");
         }
-        else if(!(cardRepository5.findById(cardId).get().getBooks().size()>max_allowed_books)){
+
+        if(!(card.getBooks().size()>max_allowed_books)){
+            transaction.setTransactionStatus(TransactionStatus.FAILED);
+            transactionRepository5.save(transaction);
             throw new RuntimeException("Book limit has reached for this card");
         }
-        else{
-            Book book=bookRepository5.findById(bookId).get();
-            Card card=cardRepository5.findById(cardId).get();
-            Transaction transaction=new Transaction();
-            transaction.setBook(book);
-            transaction.setCard(card);
-            List<Book> cardBooks=card.getBooks();
-            cardBooks.add(book);
-            card.setBooks(cardBooks);
-            book.setAvailable(false);
-            bookRepository5.save(book);
-            transactionRepository5.save(transaction);
-        }
-       return null; //return transactionId instead
+
+        book.setAvailable(false);
+        book.setCard(card);
+        List<Book> cardBooks=card.getBooks();
+        cardBooks.add(book);
+        card.setBooks(cardBooks);
+        transaction.setTransactionStatus(TransactionStatus.SUCCESSFUL);
+
+        bookRepository5.updateBook(book);
+        transactionRepository5.save(transaction);
+
+        return transaction.getTransactionId(); //return transactionId instead
     }
 
     public Transaction returnBook(int cardId, int bookId) throws Exception{
@@ -80,9 +96,33 @@ public class TransactionService {
         //make the book available for other users
         //make a new transaction for return book which contains the fine amount as well
 
-        
+        //Making the book available for other Users
+        Book book=transaction.getBook();
+        book.setAvailable(true);
+        book.setCard(null);
+        bookRepository5.updateBook(book);
 
-        Transaction returnBookTransaction  = null;
+        Card card=transaction.getCard();
+
+        //Calculating Fine amount
+        Date issuedDate = transaction.getTransactionDate();
+        Date returnDate = new Date();
+        long noOfDays = TimeUnit.DAYS.convert(Math.abs(issuedDate.getTime() - returnDate.getTime()),TimeUnit.MILLISECONDS);
+        int fine=0;
+        if(noOfDays>getMax_allowed_days){
+            fine+=noOfDays*fine_per_day;
+        }
+
+        //Creating returnBookTransaction
+        Transaction returnBookTransaction=new Transaction();
+        returnBookTransaction.setFineAmount(fine);
+        returnBookTransaction.setBook(book);
+        returnBookTransaction.setCard(card);
+        returnBookTransaction.setIssueOperation(false);
+        returnBookTransaction.setTransactionStatus(TransactionStatus.SUCCESSFUL);
+
+        transactionRepository5.save(returnBookTransaction);
+
         return returnBookTransaction; //return the transaction after updating all details
     }
 }
