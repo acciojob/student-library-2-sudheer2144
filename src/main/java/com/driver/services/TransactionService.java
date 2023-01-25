@@ -57,13 +57,13 @@ public class TransactionService {
         transaction.setCard(card);
         transaction.setIssueOperation(true);
 
-        if(!(bookRepository5.existsById(book.getId()) && book.isAvailable())){
+        if(book==null||!(bookRepository5.existsById(book.getId()) && book.isAvailable())){
             transaction.setTransactionStatus(TransactionStatus.FAILED);
             transactionRepository5.save(transaction);
             throw new RuntimeException("Book is either unavailable or not present");
         }
 
-        if(!(card.getCardStatus().toString().equals("ACTIVATED"))){
+        if(card==null||!(card.getCardStatus().toString().equals("ACTIVATED"))){
             transaction.setTransactionStatus(TransactionStatus.FAILED);
             transactionRepository5.save(transaction);
             throw new RuntimeException("Card is invalid");
@@ -107,8 +107,8 @@ public class TransactionService {
 
         //Calculating Fine amount
         Date issueDate = transaction.getTransactionDate();
-        long timeIssueTime = Math.abs(System.currentTimeMillis() - issueDate.getTime());
-        long no_of_days_passed = TimeUnit.DAYS.convert(timeIssueTime, TimeUnit.MILLISECONDS);
+        long issueTime = Math.abs(System.currentTimeMillis() - issueDate.getTime());
+        long no_of_days_passed = TimeUnit.DAYS.convert(issueTime, TimeUnit.MILLISECONDS);
         int fine = 0;
         if(no_of_days_passed > getMax_allowed_days)
         {
