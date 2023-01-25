@@ -1,7 +1,5 @@
 package com.driver.models;
 
-import com.fasterxml.jackson.annotation.JsonAnyGetter;
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
@@ -36,10 +34,6 @@ public class Card {
 
     public Card(){
         this.cardStatus = CardStatus.ACTIVATED;
-    }
-
-    public Card(CardStatus cardStatus) {
-        this.cardStatus = cardStatus;
     }
 
     public int getId() {

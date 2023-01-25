@@ -14,13 +14,6 @@ public class Student {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private int id;
 
-    public Student(String emailId, String name, int age, String country) {
-        this.emailId = emailId;
-        this.name = name;
-        this.age = age;
-        this.country = country;
-    }
-
     @Column(unique = true)
     private String emailId;
     private String name;
@@ -31,6 +24,13 @@ public class Student {
     public Student() {
     }
 
+
+    public Student(String email, String name, int age, String country) {
+        this.emailId = email;
+        this.name = name;
+        this.age = age;
+        this.country = country;
+    }
     // alter table student add foreign key constraint card references Card(id)
 
     @OneToOne
@@ -45,18 +45,6 @@ public class Student {
     @UpdateTimestamp
     private Date updatedOn;
 
-    @Override
-    public String toString() {
-        return "Student{" +
-                "id=" + id +
-                ", email='" + emailId + '\'' +
-                ", name='" + name + '\'' +
-                ", age=" + age +
-                ", country='" + country + '\'' +
-                ", createdOn=" + createdOn +
-                ", updatedOn=" + updatedOn +
-                '}';
-    }
 
     public int getId() {
         return id;
@@ -121,4 +109,19 @@ public class Student {
     public void setUpdatedOn(Date updatedOn) {
         this.updatedOn = updatedOn;
     }
+
+    @Override
+    public String toString() {
+        return "Student{" +
+                "id=" + id +
+                ", email='" + emailId + '\'' +
+                ", name='" + name + '\'' +
+                ", age=" + age +
+                ", country='" + country + '\'' +
+                ", createdOn=" + createdOn +
+                ", updatedOn=" + updatedOn +
+                '}';
+    }
+
+
 }

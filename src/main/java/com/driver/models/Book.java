@@ -39,6 +39,13 @@ public class Book {
     public Book() {
     }
 
+    public Book(String name, Genre genre, Author author) {
+        this.name = name;
+        this.genre = genre;
+        this.author = author;
+        this.available = true;
+    }
+
     public int getId() {
         return id;
     }
@@ -75,12 +82,6 @@ public class Book {
         return card;
     }
 
-    public Book(String name, Genre genre, boolean available) {
-        this.name = name;
-        this.genre = genre;
-        this.available = available;
-    }
-
     public void setCard(Card card) {
         this.card = card;
     }
@@ -101,4 +102,3 @@ public class Book {
         this.transactions = transactions;
     }
 }
-
