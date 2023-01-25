@@ -27,6 +27,7 @@ public class TransactionService {
     @Autowired
     TransactionRepository transactionRepository5;
 
+
     @Value("${books.max_allowed}")
     public int max_allowed_books;
 
@@ -105,12 +106,13 @@ public class TransactionService {
         Card card=transaction.getCard();
 
         //Calculating Fine amount
-        Date issuedDate = transaction.getTransactionDate();
-        Date returnDate = new Date();
-        long noOfDays = TimeUnit.DAYS.convert(Math.abs(issuedDate.getTime() - returnDate.getTime()),TimeUnit.MILLISECONDS);
-        int fine=0;
-        if(noOfDays>getMax_allowed_days){
-            fine+=noOfDays*fine_per_day;
+        Date issueDate = transaction.getTransactionDate();
+        long timeIssueTime = Math.abs(System.currentTimeMillis() - issueDate.getTime());
+        long no_of_days_passed = TimeUnit.DAYS.convert(timeIssueTime, TimeUnit.MILLISECONDS);
+        int fine = 0;
+        if(no_of_days_passed > getMax_allowed_days)
+        {
+            fine = (int)((no_of_days_passed - getMax_allowed_days) * fine_per_day);
         }
 
         //Creating returnBookTransaction

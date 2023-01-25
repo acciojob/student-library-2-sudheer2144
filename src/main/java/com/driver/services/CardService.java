@@ -17,11 +17,12 @@ public class CardService {
     public Card createAndReturn(Student student){
         Card card = new Card();
         card.setStudent(student);
+        student.setCard(card);
+        cardRepository3.save(card);
         return card;
     }
 
     public void deactivateCard(int student_id){
         cardRepository3.deactivateCard(student_id, CardStatus.DEACTIVATED.toString());
-
     }
 }
